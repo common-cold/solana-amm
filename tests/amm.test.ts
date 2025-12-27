@@ -2,7 +2,7 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { Amm } from "../target/types/amm";
 import { LiteSVM } from "litesvm";
-import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import fs from "node:fs";
 import os from "os";
 import dotenv from "dotenv";
@@ -11,7 +11,8 @@ import { ObjectId } from "bson";
 import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
 import { AmmAccount } from "./types";
 import { expect } from "chai";
-import { ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { ASSOCIATED_TOKEN_PROGRAM_ID, createInitializeMintInstruction, getAssociatedTokenAddressSync, MINT_SIZE, MintLayout, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { fundWallet, initMint } from "./utils";
 
 dotenv.config({ path: "./tests/.env" });
 
@@ -28,17 +29,24 @@ describe("amm", () => {
 
   anchor.setProvider(provider);
   const program = anchor.workspace.amm as Program<Amm>;
-  const ammOwner = Keypair.fromSecretKey(bs58.decode(process.env.KEYPAIR_1));
-  
 
   let svm = new LiteSVM();
   let programId = new PublicKey("5qEiXgcAj5HRZLtmQgHEwPUCzKb9XqWqjztdSxHbxkV4");
   svm.addProgramFromFile(programId, "./target/deploy/amm.so");
-  svm.airdrop(ammOwner.publicKey, BigInt(5 * LAMPORTS_PER_SOL));
+
+  const mintOwner = Keypair.fromSecretKey(bs58.decode(process.env.MINT_OWNER));
+  const ammOwner = Keypair.fromSecretKey(bs58.decode(process.env.KEYPAIR_1));
+  fundWallet(svm, mintOwner.publicKey);
+  fundWallet(svm, ammOwner.publicKey);
 
   let AMM_ID = new ObjectId("694d55ce2acc8fab670e77d0");
-  let SOL_DEVNET = new PublicKey("So11111111111111111111111111111111111111112");
-  let USDC_DEVENT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
+  
+  let SOL_DEVNET = new Keypair();
+  initMint(svm, SOL_DEVNET, mintOwner,TOKEN_PROGRAM_ID, 9);
+
+  let USDC_DEVENT = new Keypair();
+  initMint(svm, USDC_DEVENT, mintOwner,TOKEN_PROGRAM_ID, 6);
+
 
   it("Initialize AMM", async () => {
     const [ammAccount, bump] = PublicKey.findProgramAddressSync(
@@ -80,15 +88,16 @@ describe("amm", () => {
       )[0];
 
       const poolAccount = PublicKey.findProgramAddressSync(
-        [Buffer.from("pool"), AMM_ID.id, SOL_DEVNET.toBuffer(), USDC_DEVENT.toBuffer()], programId 
+        [Buffer.from("pool"), AMM_ID.id, SOL_DEVNET.publicKey.toBuffer(), USDC_DEVENT.publicKey.toBuffer()], programId 
       )[0];
 
-      const LPTokenMintAccount = PublicKey.findProgramAddressSync(
-        [Buffer.from("lp_token"), AMM_ID.id, SOL_DEVNET.toBuffer(), USDC_DEVENT.toBuffer()], programId 
-      )[0];
+      // const LPTokenMintAccount = PublicKey.findProgramAddressSync(
+      //   [Buffer.from("lp_token"), AMM_ID.id, SOL_DEVNET.publicKey.toBuffer(), USDC_DEVENT.publicKey.toBuffer()], programId 
+      // )[0];
+      const LPTokenMintAccount = new Keypair();
 
       const vaultA = getAssociatedTokenAddressSync(
-        SOL_DEVNET,
+        SOL_DEVNET.publicKey,
         ammAccount,
         true,
         TOKEN_PROGRAM_ID,
@@ -96,23 +105,31 @@ describe("amm", () => {
       );
 
       const vaultB = getAssociatedTokenAddressSync(
-        USDC_DEVENT,
+        USDC_DEVENT.publicKey,
         ammAccount,
         true,
         TOKEN_PROGRAM_ID,
         ASSOCIATED_TOKEN_PROGRAM_ID
       );
 
-      console.log(ammAccount);
+      console.log("AMM OWNER: " + ammOwner.publicKey)
+      console.log("AMM Account: " + ammAccount)
+      console.log("SOL_DEVNET: " + SOL_DEVNET.publicKey)
+      console.log("USDC_DEVNET: " + USDC_DEVENT.publicKey)
+      console.log("Pool Account: " + poolAccount)
+      console.log("LPTokenMintAccount: " + LPTokenMintAccount.publicKey)
+      console.log("Vault A: " + vaultA)
+      console.log("Vault B: " + vaultB)
+
       const tx = await program.methods
       .initializePool(Array.from(AMM_ID.id), "LPToken", "LPT")
       .accounts({
         signer: ammOwner.publicKey,
         ammAccount: ammAccount,
-        mintA: SOL_DEVNET,
-        mintB: USDC_DEVENT,
+        mintA: SOL_DEVNET.publicKey,
+        mintB: USDC_DEVENT.publicKey,
         poolAccount: poolAccount,
-        mintLiquidityToken: LPTokenMintAccount,
+        mintLiquidityToken: LPTokenMintAccount.publicKey,
         vaultA: vaultA,
         vaultB: vaultB,
 
@@ -121,16 +138,16 @@ describe("amm", () => {
         tokenProgram2022: TOKEN_2022_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
       })
-      .signers([ammOwner])
-      .transaction();
+      .signers([ammOwner, LPTokenMintAccount])
+      .rpc();
 
-      const recentBlockhash = svm.latestBlockhash();
-      tx.recentBlockhash = recentBlockhash;
-      tx.sign(ammOwner);
+      // const recentBlockhash = svm.latestBlockhash();
+      // tx.recentBlockhash = recentBlockhash;
+      // tx.sign(ammOwner, LPTokenMintAccount);
 
-      const res = svm.sendTransaction(tx);
+      // const res = svm.sendTransaction(tx);
 
-      console.log(res);
+      // console.log(res.toString());
 
       // const accountInfo = svm.getAccount(ammAccount);
       // if (!accountInfo) {

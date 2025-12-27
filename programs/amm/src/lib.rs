@@ -20,7 +20,7 @@ pub mod amm {
     }
 
     pub fn initialize_pool<'info> (ctx: Context<'_, '_, '_, 'info, InitializePool<'info>>, amm_id: [u8; 12], token_name: String, token_symbol: String) -> Result<()> {
-        ctx.accounts.process(amm_id, token_name, token_symbol)
+        ctx.accounts.process(amm_id, token_name, token_symbol, ctx.bumps.amm_account)
     }
 }
 
