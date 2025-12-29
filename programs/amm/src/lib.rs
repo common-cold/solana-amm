@@ -4,6 +4,7 @@ declare_id!("5qEiXgcAj5HRZLtmQgHEwPUCzKb9XqWqjztdSxHbxkV4");
 
 pub mod instructions;
 pub mod states;
+pub mod error;
 use crate::instructions::*;
 
 #[program]
@@ -20,7 +21,11 @@ pub mod amm {
     }
 
     pub fn initialize_pool<'info> (ctx: Context<'_, '_, '_, 'info, InitializePool<'info>>, amm_id: [u8; 12], token_name: String, token_symbol: String) -> Result<()> {
-        ctx.accounts.process(amm_id, token_name, token_symbol, ctx.bumps.amm_account)
+        ctx.accounts.process(amm_id, token_name, token_symbol, ctx.bumps.pool_account)
+    }
+
+    pub fn deposit_liquidity<'info> (ctx: Context<'_, '_, '_, 'info, DepositLiquidity<'info>>,  amm_id: [u8; 12], amount_a: u64, amount_b:u64) -> Result<()> {
+        ctx.accounts.process(amm_id, amount_a, amount_b, ctx.bumps.pool_account)
     }
 }
 
