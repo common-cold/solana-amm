@@ -11,11 +11,6 @@ use crate::instructions::*;
 pub mod amm {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
-    }
-
     pub fn initialize_amm<'info> (ctx: Context<'_, '_, '_, 'info, InitializeAmm<'info>>, amm_id: [u8; 12], fee: u16) -> Result<()> {
         ctx.accounts.process(amm_id, fee)
     }
@@ -30,6 +25,10 @@ pub mod amm {
 
     pub fn swap<'info> (ctx: Context<'_, '_, '_, 'info, Swap<'info>>, amm_id: [u8; 12], is_swap_a: bool, amount: u64) -> Result<()> {
         ctx.accounts.process(amm_id, is_swap_a, amount, ctx.bumps.pool_account)
+    }
+
+    pub fn withdraw_liquidity<'info> (ctx: Context<'_, '_, '_, 'info, WithdrawLiquidity<'info>>, amm_id: [u8; 12], amount: u64) -> Result<()> {
+        ctx.accounts.process(amm_id, amount, ctx.bumps.pool_account)
     }
 }
 

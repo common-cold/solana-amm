@@ -132,168 +132,194 @@ describe("amm", async function () {
 
 
 
-    // it("Initialize AMM", async () => {
-    //     const ammAccountInfo = await connection.getAccountInfo(ammAccount);
+    it("Initialize AMM", async () => {
+        const ammAccountInfo = await connection.getAccountInfo(ammAccount);
         
-    //     if (!ammAccountInfo) {
-    //         const tx = await program.methods
-    //         .initializeAmm(Array.from(AMM_ID.id), 30)
-    //         .accounts({
-    //         signer: ammOwner.publicKey,
-    //         ammAccount: ammAccount,
-    //         systemProgram: SYSTEM_PROGRAM_ID
-    //         })
-    //         .signers([ammOwner])
-    //         .rpc();
+        if (!ammAccountInfo) {
+            const tx = await program.methods
+            .initializeAmm(Array.from(AMM_ID.id), 30)
+            .accounts({
+            signer: ammOwner.publicKey,
+            ammAccount: ammAccount,
+            systemProgram: SYSTEM_PROGRAM_ID
+            })
+            .signers([ammOwner])
+            .rpc();
 
-    //         console.log(tx);
-    //     }
+            console.log(tx);
+        }
 
-    //     const data = await program.account.ammAccount.fetch(ammAccount);
-    //     expect(data.id).to.deep.equal(Array.from(AMM_ID.id));
-    //     expect(data.owner.toBase58()).to.equal(ammOwner.publicKey.toBase58());
-    //     expect(data.fee).to.equal(30);
-    // });
+        const data = await program.account.ammAccount.fetch(ammAccount);
+        expect(data.id).to.deep.equal(Array.from(AMM_ID.id));
+        expect(data.owner.toBase58()).to.equal(ammOwner.publicKey.toBase58());
+        expect(data.fee).to.equal(30);
+    });
 
-    // it("Initialize Pool", async () => {
-    //     const poolAccountInfo = await connection.getAccountInfo(poolAccount);
-    //     if (!poolAccountInfo) {
-    //         const tx = await program.methods
-    //         .initializePool(Array.from(AMM_ID.id), TOKEN_NAME, TOKEN_SYMBOL)
-    //         .accounts({
-    //             signer: ammOwner.publicKey,
-    //             ammAccount: ammAccount,
-    //             mintA: TOKEN_A_DEVNET,
-    //             mintB: TOKEN_B_DEVNET,
-    //             poolAccount: poolAccount,
-    //             mintLiquidityToken: LPTokenMintAccount,
-    //             vaultA: vaultA,
-    //             vaultB: vaultB,
+    it("Initialize Pool", async () => {
+        const poolAccountInfo = await connection.getAccountInfo(poolAccount);
+        if (!poolAccountInfo) {
+            const tx = await program.methods
+            .initializePool(Array.from(AMM_ID.id), TOKEN_NAME, TOKEN_SYMBOL)
+            .accounts({
+                signer: ammOwner.publicKey,
+                ammAccount: ammAccount,
+                mintA: TOKEN_A_DEVNET,
+                mintB: TOKEN_B_DEVNET,
+                poolAccount: poolAccount,
+                mintLiquidityToken: LPTokenMintAccount,
+                vaultA: vaultA,
+                vaultB: vaultB,
 
-    //             systemProgram: SYSTEM_PROGRAM_ID,
-    //             tokenProgram: TOKEN_PROGRAM_ID,
-    //             tokenProgram2022: TOKEN_2022_PROGRAM_ID,
-    //             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-    //         })
-    //         .signers([ammOwner])
-    //         .rpc();
+                systemProgram: SYSTEM_PROGRAM_ID,
+                tokenProgram: TOKEN_PROGRAM_ID,
+                tokenProgram2022: TOKEN_2022_PROGRAM_ID,
+                associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+            })
+            .signers([ammOwner])
+            .rpc();
 
-    //         console.log(tx);
-    //     }
+            console.log(tx);
+        }
 
-    //     const poolData = await program.account.poolAccount.fetch(poolAccount);
-    //     expect(poolData.poolAuthority.toBase58()).to.equal(ammAccount.toBase58());
-    //     expect(poolData.mintA.toBase58()).to.equal(TOKEN_A_DEVNET.toBase58());
-    //     expect(poolData.mintB.toBase58()).to.equal(TOKEN_B_DEVNET.toBase58());
-    //     expect(poolData.mintLiquidityToken.toBase58()).to.equal(LPTokenMintAccount.toBase58());
-    //     expect(poolData.vaultA.toBase58()).to.equal(vaultA.toBase58());
-    //     expect(poolData.vaultB.toBase58()).to.equal(vaultB.toBase58());
+        const poolData = await program.account.poolAccount.fetch(poolAccount);
+        expect(poolData.poolAuthority.toBase58()).to.equal(ammAccount.toBase58());
+        expect(poolData.mintA.toBase58()).to.equal(TOKEN_A_DEVNET.toBase58());
+        expect(poolData.mintB.toBase58()).to.equal(TOKEN_B_DEVNET.toBase58());
+        expect(poolData.mintLiquidityToken.toBase58()).to.equal(LPTokenMintAccount.toBase58());
+        expect(poolData.vaultA.toBase58()).to.equal(vaultA.toBase58());
+        expect(poolData.vaultB.toBase58()).to.equal(vaultB.toBase58());
 
-    //     const LPTokenMintData = await getMint(connection, LPTokenMintAccount, null, TOKEN_2022_PROGRAM_ID);
-    //     expect(LPTokenMintData.decimals).to.equal(9);
-    //     expect(LPTokenMintData.freezeAuthority.toBase58()).to.equal(poolAccount.toBase58());
-    //     expect(LPTokenMintData.mintAuthority.toBase58()).to.equal(poolAccount.toBase58()); 
-    //     expect(LPTokenMintData.supply).to.equal(BigInt(0));
+        const LPTokenMintData = await getMint(connection, LPTokenMintAccount, null, TOKEN_2022_PROGRAM_ID);
+        expect(LPTokenMintData.decimals).to.equal(9);
+        expect(LPTokenMintData.freezeAuthority.toBase58()).to.equal(poolAccount.toBase58());
+        expect(LPTokenMintData.mintAuthority.toBase58()).to.equal(poolAccount.toBase58()); 
+        expect(LPTokenMintData.supply).to.equal(BigInt(0));
 
-    //     const LPTokenMetadata = await getTokenMetadata(connection, LPTokenMintAccount);
-    //     expect(LPTokenMetadata.name).to.equal(TOKEN_NAME);
-    //     expect(LPTokenMetadata.symbol).to.equal(TOKEN_SYMBOL);
-    //     expect(LPTokenMetadata.updateAuthority.toBase58()).to.equal(poolAccount.toBase58());
+        const LPTokenMetadata = await getTokenMetadata(connection, LPTokenMintAccount);
+        expect(LPTokenMetadata.name).to.equal(TOKEN_NAME);
+        expect(LPTokenMetadata.symbol).to.equal(TOKEN_SYMBOL);
+        expect(LPTokenMetadata.updateAuthority.toBase58()).to.equal(poolAccount.toBase58());
 
-    //     // await mintTokenToUser(connection, mintOwner, TOKEN_A_DEVNET, LP1AtaA,  BigInt(5 * Math.pow(10, TOKEN_A_DECIMALS)));
-    //     // await mintTokenToUser(connection, mintOwner, TOKEN_B_DEVNET, LP1AtaB,  BigInt(500 * Math.pow(10, TOKEN_B_DECIMALS)));
-    // });
+        // await mintTokenToUser(connection, mintOwner, TOKEN_A_DEVNET, LP1AtaA,  BigInt(5 * Math.pow(10, TOKEN_A_DECIMALS)));
+        // await mintTokenToUser(connection, mintOwner, TOKEN_B_DEVNET, LP1AtaB,  BigInt(500 * Math.pow(10, TOKEN_B_DECIMALS)));
+    });
 
 
 
-    // it("Deposit Liquidity For First Time in ratio 1:150", async () => {
-    //     // Let Market Price:
-    //     // 1 TOKEN A = 150 TOKEN B
+    it("Deposit Liquidity For First Time in ratio 1:150", async () => {
+        // Let Market Price:
+        // 1 TOKEN A = 150 TOKEN B
        
-    //     const tx = await program.methods
-    //     .depositLiquidity(Array.from(AMM_ID.id), new BN(1 * Math.pow(10, TOKEN_A_DECIMALS)), new BN(150 * Math.pow(10, TOKEN_B_DECIMALS)))
-    //     .accounts({
-    //         signer: liquidityProvider1.publicKey,
-    //         mintA: TOKEN_A_DEVNET,
-    //         mintB: TOKEN_B_DEVNET,
-    //         poolAccount: poolAccount,
-    //         mintLiquidityToken: LPTokenMintAccount,
-    //         vaultA: vaultA,
-    //         vaultB: vaultB,
-    //         userAtaA: LP1AtaA,
-    //         userAtaB: LP1AtaB,
-    //         userLiquidityTokenAta: LP1LiquidityTokenAta,
-    //         lockPda: lockPda,
-    //         lockedLpAta: lockedLpAta,
-    //         systemProgram: SYSTEM_PROGRAM_ID,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         tokenProgram2022: TOKEN_2022_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-    //     })
-    //     .signers([liquidityProvider1])
-    //     .rpc();
+        const tx = await program.methods
+        .depositLiquidity(Array.from(AMM_ID.id), new BN(1 * Math.pow(10, TOKEN_A_DECIMALS)), new BN(150 * Math.pow(10, TOKEN_B_DECIMALS)))
+        .accounts({
+            signer: liquidityProvider1.publicKey,
+            mintA: TOKEN_A_DEVNET,
+            mintB: TOKEN_B_DEVNET,
+            poolAccount: poolAccount,
+            mintLiquidityToken: LPTokenMintAccount,
+            vaultA: vaultA,
+            vaultB: vaultB,
+            userAtaA: LP1AtaA,
+            userAtaB: LP1AtaB,
+            userLiquidityTokenAta: LP1LiquidityTokenAta,
+            lockPda: lockPda,
+            lockedLpAta: lockedLpAta,
+            systemProgram: SYSTEM_PROGRAM_ID,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            tokenProgram2022: TOKEN_2022_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([liquidityProvider1])
+        .rpc();
 
-    //     console.log(tx);
+        console.log(tx);
 
-    // });
+    });
 
-    // it("Deposit Liquidity For Second Time By Different User in ratio 2:300", async () => {
-    //     // Let Market Price:
-    //     // 1 TOKEN A = 150 TOKEN B
+    it("Deposit Liquidity For Second Time By Different User in ratio 2:300", async () => {
+        // Let Market Price:
+        // 1 TOKEN A = 150 TOKEN B
        
-    //     const tx = await program.methods
-    //     .depositLiquidity(Array.from(AMM_ID.id), new BN(2 * Math.pow(10, TOKEN_A_DECIMALS)), new BN(300 * Math.pow(10, TOKEN_B_DECIMALS)))
-    //     .accounts({
-    //         signer: liquidityProvider2.publicKey,
-    //         mintA: TOKEN_A_DEVNET,
-    //         mintB: TOKEN_B_DEVNET,
-    //         poolAccount: poolAccount,
-    //         mintLiquidityToken: LPTokenMintAccount,
-    //         vaultA: vaultA,
-    //         vaultB: vaultB,
-    //         userAtaA: LP2AtaA,
-    //         userAtaB: LP2AtaB,
-    //         userLiquidityTokenAta: LP2LiquidityTokenAta,
-    //         lockPda: lockPda,
-    //         lockedLpAta: lockedLpAta,
-    //         systemProgram: SYSTEM_PROGRAM_ID,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         tokenProgram2022: TOKEN_2022_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-    //     })
-    //     .signers([liquidityProvider2])
-    //     .rpc();
+        const tx = await program.methods
+        .depositLiquidity(Array.from(AMM_ID.id), new BN(2 * Math.pow(10, TOKEN_A_DECIMALS)), new BN(300 * Math.pow(10, TOKEN_B_DECIMALS)))
+        .accounts({
+            signer: liquidityProvider2.publicKey,
+            mintA: TOKEN_A_DEVNET,
+            mintB: TOKEN_B_DEVNET,
+            poolAccount: poolAccount,
+            mintLiquidityToken: LPTokenMintAccount,
+            vaultA: vaultA,
+            vaultB: vaultB,
+            userAtaA: LP2AtaA,
+            userAtaB: LP2AtaB,
+            userLiquidityTokenAta: LP2LiquidityTokenAta,
+            lockPda: lockPda,
+            lockedLpAta: lockedLpAta,
+            systemProgram: SYSTEM_PROGRAM_ID,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            tokenProgram2022: TOKEN_2022_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([liquidityProvider2])
+        .rpc();
 
-    //     console.log(tx);
+        console.log(tx);
 
-    // });
+    });
 
-    // it("Swap Token, Swap 1 Token A", async () => {
-    //     // Let Market Price:
-    //     // 1 TOKEN A = 150 TOKEN B
+    it("Swap Token, Swap 1 Token A", async () => {
+        // Let Market Price:
+        // 1 TOKEN A = 150 TOKEN B
        
-    //     const tx = await program.methods
-    //     .swap(Array.from(AMM_ID.id), true, new BN(1 * Math.pow(10, TOKEN_A_DECIMALS)))
-    //     .accounts({
-    //         signer: trader.publicKey,
-    //         ammAccount: ammAccount,
-    //         mintA: TOKEN_A_DEVNET,
-    //         mintB: TOKEN_B_DEVNET,
-    //         poolAccount: poolAccount,
-    //         vaultA: vaultA,
-    //         vaultB: vaultB,
-    //         userAtaA: traderAtaA,
-    //         userAtaB: traderAtaB,
-    //         systemProgram: SYSTEM_PROGRAM_ID,
-    //         tokenProgram: TOKEN_PROGRAM_ID,
-    //         tokenProgram2022: TOKEN_2022_PROGRAM_ID,
-    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-    //     })
-    //     .signers([trader])
-    //     .rpc();
+        const tx = await program.methods
+        .swap(Array.from(AMM_ID.id), true, new BN(1 * Math.pow(10, TOKEN_A_DECIMALS)))
+        .accounts({
+            signer: trader.publicKey,
+            ammAccount: ammAccount,
+            mintA: TOKEN_A_DEVNET,
+            mintB: TOKEN_B_DEVNET,
+            poolAccount: poolAccount,
+            vaultA: vaultA,
+            vaultB: vaultB,
+            userAtaA: traderAtaA,
+            userAtaB: traderAtaB,
+            systemProgram: SYSTEM_PROGRAM_ID,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            tokenProgram2022: TOKEN_2022_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([trader])
+        .rpc();
 
-    //     console.log(tx);
+        console.log(tx);
 
-    // });
+    });
 
+
+    it("LP 1 Withdraws Liquidity", async () => {
+        const tx = await program.methods
+        .withdrawLiquidity(Array.from(AMM_ID.id), new BN(387297334))
+        .accounts({
+            signer: liquidityProvider1.publicKey,
+            mintA: TOKEN_A_DEVNET,
+            mintB: TOKEN_B_DEVNET,
+            poolAccount: poolAccount,
+            mintLiquidityToken: LPTokenMintAccount,
+            vaultA: vaultA,
+            vaultB: vaultB,
+            userAtaA: LP1AtaA,
+            userAtaB: LP1AtaB,
+            userLiquidityTokenAta: LP1LiquidityTokenAta,
+            systemProgram: SYSTEM_PROGRAM_ID,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            tokenProgram2022: TOKEN_2022_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([liquidityProvider1])
+        .rpc();
+
+        console.log(tx);
+
+    });
 });
