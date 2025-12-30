@@ -74,7 +74,7 @@ pub struct DepositLiquidity<'info> {
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub token_program_2022: Program<'info, Token2022>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub associated_token_program: Program<'info, AssociatedToken>
 }
 
 impl<'info> DepositLiquidity<'info> {
@@ -128,7 +128,7 @@ impl<'info> DepositLiquidity<'info> {
         let seeds: &[&[&[u8]]] = &[&[b"pool".as_ref(), amm_id.as_ref(), mint_a_key.as_ref(), mint_b_key.as_ref(), &[pool_account_bump]]];
         
         let liquidity = if is_pool_creation {
-            let mut liquidity = I64F64::from_num(amount_a)
+            let liquidity = I64F64::from_num(amount_a)
                 .checked_mul(I64F64::from_num(amount_b))
                 .unwrap()
                 .sqrt()

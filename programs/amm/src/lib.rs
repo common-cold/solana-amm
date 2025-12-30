@@ -27,6 +27,10 @@ pub mod amm {
     pub fn deposit_liquidity<'info> (ctx: Context<'_, '_, '_, 'info, DepositLiquidity<'info>>,  amm_id: [u8; 12], amount_a: u64, amount_b:u64) -> Result<()> {
         ctx.accounts.process(amm_id, amount_a, amount_b, ctx.bumps.pool_account)
     }
+
+    pub fn swap<'info> (ctx: Context<'_, '_, '_, 'info, Swap<'info>>, amm_id: [u8; 12], is_swap_a: bool, amount: u64) -> Result<()> {
+        ctx.accounts.process(amm_id, is_swap_a, amount, ctx.bumps.pool_account)
+    }
 }
 
 #[derive(Accounts)]

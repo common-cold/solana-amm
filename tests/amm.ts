@@ -28,7 +28,9 @@ describe("amm", async function () {
     const tokenAMint = Keypair.fromSecretKey(bs58.decode(process.env.TOKEN_A_MINT)); //9 decimals
     const tokenBMint = Keypair.fromSecretKey(bs58.decode(process.env.TOKEN_B_MINT)); //6 decimals
     const ammOwner = Keypair.fromSecretKey(bs58.decode(process.env.KEYPAIR_1));
-    const user = Keypair.fromSecretKey(bs58.decode(process.env.KEYPAIR_2));
+    const liquidityProvider1 = Keypair.fromSecretKey(bs58.decode(process.env.KEYPAIR_2));
+    const liquidityProvider2 = Keypair.fromSecretKey(bs58.decode(process.env.KEYPAIR_3));
+    const trader = Keypair.fromSecretKey(bs58.decode(process.env.KEYPAIR_4));
 
     let AMM_ID = new ObjectId("694d55ce2acc8fab670e77d2");
     let TOKEN_A_DEVNET = tokenAMint.publicKey;
@@ -80,20 +82,30 @@ describe("amm", async function () {
         ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
-    const userLiquidityTokenAta = getAssociatedTokenAddressSync(
+    const LP1LiquidityTokenAta = getAssociatedTokenAddressSync(
         LPTokenMintAccount,
-        user.publicKey,
+        liquidityProvider1.publicKey,
         false,
         TOKEN_2022_PROGRAM_ID,
         ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
-    // let userAtaA = await getOrCreateAta(connection, mintOwner, TOKEN_A_DEVNET, user.publicKey);
+    const LP2LiquidityTokenAta = getAssociatedTokenAddressSync(
+        LPTokenMintAccount,
+        liquidityProvider2.publicKey,
+        false,
+        TOKEN_2022_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID
+    );
 
-    // let userAtaB = await getOrCreateAta(connection, mintOwner, TOKEN_B_DEVNET, user.publicKey);
+    let LP1AtaA = new PublicKey("BnoEZys6keoSWMHYc99Ah6NHhGZbsFg2ZumeZNdUF47G");
+    let LP1AtaB = new PublicKey("8QbhWQuMMpYWAdoRhNGxmXbYXuh3F87jx1ENSYLAuYj3");
 
-    let userAtaA = new PublicKey("BnoEZys6keoSWMHYc99Ah6NHhGZbsFg2ZumeZNdUF47G");
-    let userAtaB = new PublicKey("8QbhWQuMMpYWAdoRhNGxmXbYXuh3F87jx1ENSYLAuYj3");
+    let LP2AtaA = new PublicKey("6jPpXx9DeRDfF2cQQ8wWF2XWmcVMofEFraKYVcPFfDuB");
+    let LP2AtaB = new PublicKey("FHf8gHwbdJtSNhErcnj4DBsN9rvgsZz6sVuALxf2pCFC");
+
+    let traderAtaA = new PublicKey("4TKnpX4BW3f4kWsJa1pjyzd47GWZcEZDfWbvQiL5aT5Z");
+    let traderAtaB = new PublicKey("8Kt4a6B2e3Y7k7Y4koWvSuPuVWvVNeFTio5pExFWQH3x");
 
     const TOKEN_NAME = "LPToken";
     const TOKEN_SYMBOL = "LPT";
@@ -109,9 +121,14 @@ describe("amm", async function () {
     console.log("Locked LP Ata: " + lockedLpAta);
     console.log("Vault A: " + vaultA)
     console.log("Vault B: " + vaultB)
-    console.log("User LP TOken Ata: " + userLiquidityTokenAta);
-    console.log("User Ata A: " + userAtaA)
-    console.log("User Ata A: " + userAtaB)
+    console.log("LP1 Token Ata: " + LP1LiquidityTokenAta);
+    console.log("LP2 Token Ata: " + LP2LiquidityTokenAta);
+    console.log("LP1 Ata A: " + LP1AtaA)
+    console.log("Lp1 Ata B: " + LP1AtaB)
+    console.log("LP2 Ata A: " + LP2AtaA)
+    console.log("Lp2 Ata B: " + LP2AtaB)
+    console.log("Trader Ata A: " + traderAtaA)
+    console.log("Trader Ata B: " + traderAtaB)
 
 
 
@@ -183,40 +200,100 @@ describe("amm", async function () {
     //     expect(LPTokenMetadata.symbol).to.equal(TOKEN_SYMBOL);
     //     expect(LPTokenMetadata.updateAuthority.toBase58()).to.equal(poolAccount.toBase58());
 
-    //     await mintTokenToUser(connection, mintOwner, TOKEN_A_DEVNET, userAtaA,  BigInt(5 * Math.pow(10, TOKEN_A_DECIMALS)));
-    //     await mintTokenToUser(connection, mintOwner, TOKEN_B_DEVNET, userAtaB,  BigInt(500 * Math.pow(10, TOKEN_B_DECIMALS)));
+    //     // await mintTokenToUser(connection, mintOwner, TOKEN_A_DEVNET, LP1AtaA,  BigInt(5 * Math.pow(10, TOKEN_A_DECIMALS)));
+    //     // await mintTokenToUser(connection, mintOwner, TOKEN_B_DEVNET, LP1AtaB,  BigInt(500 * Math.pow(10, TOKEN_B_DECIMALS)));
     // });
 
 
 
-    // it("Deposit Liquidity For First Time", async () => {
-        //Let Market Price:
-        // 1 TOKEN A = 150 TOKEN B
+    // it("Deposit Liquidity For First Time in ratio 1:150", async () => {
+    //     // Let Market Price:
+    //     // 1 TOKEN A = 150 TOKEN B
        
-        // const tx = await program.methods
-        // .depositLiquidity(Array.from(AMM_ID.id), new BN(1 * Math.pow(10, TOKEN_A_DECIMALS)), new BN(150 * Math.pow(10, TOKEN_B_DECIMALS)))
-        // .accounts({
-        //     signer: user.publicKey,
-        //     mintA: TOKEN_A_DEVNET,
-        //     mintB: TOKEN_B_DEVNET,
-        //     poolAccount: poolAccount,
-        //     mintLiquidityToken: LPTokenMintAccount,
-        //     vaultA: vaultA,
-        //     vaultB: vaultB,
-        //     userAtaA: userAtaA,
-        //     userAtaB: userAtaB,
-        //     userLiquidityTokenAta: userLiquidityTokenAta,
-        //     lockPda: lockPda,
-        //     lockedLpAta: lockedLpAta,
-        //     systemProgram: SYSTEM_PROGRAM_ID,
-        //     tokenProgram: TOKEN_PROGRAM_ID,
-        //     tokenProgram2022: TOKEN_2022_PROGRAM_ID,
-        //     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-        // })
-        // .signers([user])
-        // .rpc();
+    //     const tx = await program.methods
+    //     .depositLiquidity(Array.from(AMM_ID.id), new BN(1 * Math.pow(10, TOKEN_A_DECIMALS)), new BN(150 * Math.pow(10, TOKEN_B_DECIMALS)))
+    //     .accounts({
+    //         signer: liquidityProvider1.publicKey,
+    //         mintA: TOKEN_A_DEVNET,
+    //         mintB: TOKEN_B_DEVNET,
+    //         poolAccount: poolAccount,
+    //         mintLiquidityToken: LPTokenMintAccount,
+    //         vaultA: vaultA,
+    //         vaultB: vaultB,
+    //         userAtaA: LP1AtaA,
+    //         userAtaB: LP1AtaB,
+    //         userLiquidityTokenAta: LP1LiquidityTokenAta,
+    //         lockPda: lockPda,
+    //         lockedLpAta: lockedLpAta,
+    //         systemProgram: SYSTEM_PROGRAM_ID,
+    //         tokenProgram: TOKEN_PROGRAM_ID,
+    //         tokenProgram2022: TOKEN_2022_PROGRAM_ID,
+    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+    //     })
+    //     .signers([liquidityProvider1])
+    //     .rpc();
 
-        // console.log(tx);
+    //     console.log(tx);
 
     // });
+
+    // it("Deposit Liquidity For Second Time By Different User in ratio 2:300", async () => {
+    //     // Let Market Price:
+    //     // 1 TOKEN A = 150 TOKEN B
+       
+    //     const tx = await program.methods
+    //     .depositLiquidity(Array.from(AMM_ID.id), new BN(2 * Math.pow(10, TOKEN_A_DECIMALS)), new BN(300 * Math.pow(10, TOKEN_B_DECIMALS)))
+    //     .accounts({
+    //         signer: liquidityProvider2.publicKey,
+    //         mintA: TOKEN_A_DEVNET,
+    //         mintB: TOKEN_B_DEVNET,
+    //         poolAccount: poolAccount,
+    //         mintLiquidityToken: LPTokenMintAccount,
+    //         vaultA: vaultA,
+    //         vaultB: vaultB,
+    //         userAtaA: LP2AtaA,
+    //         userAtaB: LP2AtaB,
+    //         userLiquidityTokenAta: LP2LiquidityTokenAta,
+    //         lockPda: lockPda,
+    //         lockedLpAta: lockedLpAta,
+    //         systemProgram: SYSTEM_PROGRAM_ID,
+    //         tokenProgram: TOKEN_PROGRAM_ID,
+    //         tokenProgram2022: TOKEN_2022_PROGRAM_ID,
+    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+    //     })
+    //     .signers([liquidityProvider2])
+    //     .rpc();
+
+    //     console.log(tx);
+
+    // });
+
+    // it("Swap Token, Swap 1 Token A", async () => {
+    //     // Let Market Price:
+    //     // 1 TOKEN A = 150 TOKEN B
+       
+    //     const tx = await program.methods
+    //     .swap(Array.from(AMM_ID.id), true, new BN(1 * Math.pow(10, TOKEN_A_DECIMALS)))
+    //     .accounts({
+    //         signer: trader.publicKey,
+    //         ammAccount: ammAccount,
+    //         mintA: TOKEN_A_DEVNET,
+    //         mintB: TOKEN_B_DEVNET,
+    //         poolAccount: poolAccount,
+    //         vaultA: vaultA,
+    //         vaultB: vaultB,
+    //         userAtaA: traderAtaA,
+    //         userAtaB: traderAtaB,
+    //         systemProgram: SYSTEM_PROGRAM_ID,
+    //         tokenProgram: TOKEN_PROGRAM_ID,
+    //         tokenProgram2022: TOKEN_2022_PROGRAM_ID,
+    //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+    //     })
+    //     .signers([trader])
+    //     .rpc();
+
+    //     console.log(tx);
+
+    // });
+
 });
